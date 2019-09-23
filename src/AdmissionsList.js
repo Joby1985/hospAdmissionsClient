@@ -27,7 +27,7 @@ class AdmissionsList extends Component {
   }
 
   async remove(id) {
-    await fetch(`admissions`, {
+  await fetch(`admissions/${id}`, {
       method: 'DELETE',
       headers: {
         'X-XSRF-TOKEN': this.state.csrfToken,
@@ -36,8 +36,9 @@ class AdmissionsList extends Component {
       },
       credentials: 'include'
     }).then(() => {
-      let updatedGroups = [...this.state.admissions].filter(i => i.id !== id);
-      this.setState({admissions: updatedGroups});
+      let updatedAdmissions = [...this.state.admissions].filter(i => i.id !== id);
+	  console.log(id);
+      this.setState({admissions: updatedAdmissions});
     });
   }
 

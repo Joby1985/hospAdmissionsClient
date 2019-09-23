@@ -5,10 +5,17 @@ import AppNavbar from './AppNavbar';
 import { instanceOf } from 'prop-types';
 import { Cookies, withCookies } from 'react-cookie';
 
+import { render } from 'react-dom';
+
 class AdmissionEdit extends Component {
-  static propTypes = {
-    cookies: instanceOf(Cookies).isRequired
-  };
+
+  state = {
+    sexes: [],
+	categories: [],
+    selectedSex: "",
+	selectedCategory: "",
+    validationError: ""
+  }
 
   emptyItem = {
 	admissionId: '',
@@ -32,6 +39,17 @@ class AdmissionEdit extends Component {
 
   async componentDidMount() {
     if (this.props.match.params.id !== 'new') {
+		fetch('/getSexes')
+    .then((response) => {
+      return response.json();
+    })
+    .then(data => {
+      let sexesFromApi = data.map(sex => { return {value: sex.code, display: sex.name} })
+      this.setState({ sexes: [{value: '', display: '(Select the sex)'}].concat(sexesFromApi) });
+    }).catch(error => {
+      console.log(error);
+    });
+	
       try {
         const admission = await (await fetch(`/admissions`, {credentials: 'include'})).json();
         this.setState({item: admission});
@@ -39,6 +57,10 @@ class AdmissionEdit extends Component {
         this.props.history.push('/');
       }
     }
+  }
+
+  _handleChangeEvent(val) {
+     return val;
   }
 
   handleChange(event) {
@@ -67,34 +89,36 @@ class AdmissionEdit extends Component {
     this.props.history.push('/admissions');
   }
 
+
   render() {
     const {item} = this.state;
-    const title = <h2>{item.id ? 'Edit Admission' : 'Add Admission'}</h2>;
+    const title = <h2>{item.id ? 'Edit Admission' : ''}</h2>;
 
     return <div>
       <AppNavbar/>
       <Container>
         {title}
         <Form onSubmit={this.handleSubmit}>
-		  <FormGroup>
-            <Label for="name">AdmissionID</Label>
-            <Input type="text" name="id" id="id" value={item.admissionId || ''}
-                   onChange={this.handleChange} autoComplete="admissionId"/>
-          </FormGroup>
           <FormGroup>
             <Label for="name">Name</Label>
             <Input type="text" name="name" id="name" value={item.patientName || ''}
-                   onChange={this.handleChange} autoComplete="patientName"/>
+                   onChange={this.handleChange} autoComplete="patientName" defaultValue="" required/>
           </FormGroup>
           <FormGroup>
             <Label for="DOB">DOB</Label>
             <Input type="Date" name="DOB" id="DOB" value={item.patientDOB || ''}
-                   onChange={this.handleChange} autoComplete="patientDOB"/>
+                   onChange={this.handleChange} autoComplete="patientDOB" defaultValue="" required/>
           </FormGroup>
           <FormGroup>
             <Label for="Sex">Sex</Label>
             <Input type="select" name="Sex" id="Sex" value={item.patientSex || ''}
-                   onChange={this.handleChange} autoComplete="patientSex"/>
+                   onChange={this.handleChange} autoComplete="patientSex" defaultValue="" required/>
+          </FormGroup>
+		  
+          <FormGroup>
+            <Label for="Category">Category</Label>
+            <Input type="select" name="Category" id="Category" value={item.Category || ''}
+                   onChange={this.handleChange} autoComplete="Category" defaultValue="" required/>
           </FormGroup>
           <FormGroup>
             <Button color="primary" type="submit">Save</Button>{' '}
